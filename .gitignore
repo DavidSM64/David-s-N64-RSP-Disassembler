@@ -21,3 +21,10 @@ $RECYCLE.BIN/
 # =========================
 # Operating System Files
 # =========================
+*.exe
+bin/Debug/*
+obj/Debug/*
+*.pdb
+*.cache
+.vs/N64_RSP_DISASSEMBLER/v14/.suo
+sm64.z64
