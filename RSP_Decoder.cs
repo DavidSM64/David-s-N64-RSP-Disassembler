@@ -375,7 +375,7 @@ namespace N64_RSP_DISASSEMBLER
             GP_REGISTER dest = (GP_REGISTER)((operation >> 11) & 0x1F);
             GP_REGISTER src = (GP_REGISTER)((operation >> 16) & 0x1F);
             int imm = (int)((operation >> 6) & 0x1F);
-            return opcode + " " + getGRPRegName(dest) + ", " + src.ToString() + ", " + imm;
+            return opcode + " " + getGRPRegName(dest) + ", " + getGRPRegName(src) + ", " + imm;
         }
         
         public static string decodeOPERATION(uint operation, uint address, bool useRegNames)
