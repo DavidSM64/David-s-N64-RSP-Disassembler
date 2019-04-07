@@ -5,7 +5,7 @@
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{539E1054-6BDE-4CDF-B9D4-A65C83ACED73}</ProjectGuid>
-    <OutputType>Exe</OutputType>
+    <OutputType>WinExe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>N64_RSP_DISASSEMBLER</RootNamespace>
     <AssemblyName>N64_RSP_DISASSEMBLER</AssemblyName>

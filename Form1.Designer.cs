@@ -41,6 +41,9 @@
             this.cb_showAddresses = new System.Windows.Forms.CheckBox();
             this.cb_showBinary = new System.Windows.Forms.CheckBox();
             this.cb_regNames = new System.Windows.Forms.CheckBox();
+            this.cb_longForm = new System.Windows.Forms.CheckBox();
+            this.button2 = new System.Windows.Forms.Button();
+            this.cb_useArmipsNames = new System.Windows.Forms.CheckBox();
             this.SuspendLayout();
             // 
             // textBox
@@ -48,9 +51,9 @@
             this.textBox.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.textBox.Location = new System.Drawing.Point(-1, 50);
+            this.textBox.Location = new System.Drawing.Point(-1, 74);
             this.textBox.Name = "textBox";
-            this.textBox.Size = new System.Drawing.Size(562, 365);
+            this.textBox.Size = new System.Drawing.Size(565, 392);
             this.textBox.TabIndex = 0;
             this.textBox.Text = resources.GetString("textBox.Text");
             // 
@@ -59,7 +62,7 @@
             this.button_loadROM.AutoSize = true;
             this.button_loadROM.Location = new System.Drawing.Point(5, 4);
             this.button_loadROM.Name = "button_loadROM";
-            this.button_loadROM.Size = new System.Drawing.Size(75, 42);
+            this.button_loadROM.Size = new System.Drawing.Size(75, 41);
             this.button_loadROM.TabIndex = 1;
             this.button_loadROM.Text = "Load BIN\r\nor ROM file";
             this.button_loadROM.UseVisualStyleBackColor = true;
@@ -89,7 +92,7 @@
             this.textBox_DATA_LENGTH.Name = "textBox_DATA_LENGTH";
             this.textBox_DATA_LENGTH.Size = new System.Drawing.Size(58, 20);
             this.textBox_DATA_LENGTH.TabIndex = 7;
-            this.textBox_DATA_LENGTH.Text = "0";
+            this.textBox_DATA_LENGTH.Text = "1000";
             this.textBox_DATA_LENGTH.TextChanged += new System.EventHandler(this.textBox_DATA_LENGTH_TextChanged);
             // 
             // label3
@@ -134,7 +137,7 @@
             this.cb_showAddresses.AutoSize = true;
             this.cb_showAddresses.Checked = true;
             this.cb_showAddresses.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.cb_showAddresses.Location = new System.Drawing.Point(128, 28);
+            this.cb_showAddresses.Location = new System.Drawing.Point(92, 28);
             this.cb_showAddresses.Name = "cb_showAddresses";
             this.cb_showAddresses.RightToLeft = System.Windows.Forms.RightToLeft.No;
             this.cb_showAddresses.Size = new System.Drawing.Size(105, 17);
@@ -148,7 +151,7 @@
             this.cb_showBinary.AutoSize = true;
             this.cb_showBinary.Checked = true;
             this.cb_showBinary.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.cb_showBinary.Location = new System.Drawing.Point(235, 28);
+            this.cb_showBinary.Location = new System.Drawing.Point(199, 28);
             this.cb_showBinary.Name = "cb_showBinary";
             this.cb_showBinary.RightToLeft = System.Windows.Forms.RightToLeft.No;
             this.cb_showBinary.Size = new System.Drawing.Size(107, 17);
@@ -160,7 +163,7 @@
             // cb_regNames
             // 
             this.cb_regNames.AutoSize = true;
-            this.cb_regNames.Location = new System.Drawing.Point(345, 28);
+            this.cb_regNames.Location = new System.Drawing.Point(309, 28);
             this.cb_regNames.Name = "cb_regNames";
             this.cb_regNames.RightToLeft = System.Windows.Forms.RightToLeft.No;
             this.cb_regNames.Size = new System.Drawing.Size(170, 17);
@@ -169,11 +172,48 @@
             this.cb_regNames.UseVisualStyleBackColor = true;
             this.cb_regNames.CheckedChanged += new System.EventHandler(this.cb_showBinary_CheckedChanged);
             // 
+            // cb_longForm
+            // 
+            this.cb_longForm.AutoSize = true;
+            this.cb_longForm.Location = new System.Drawing.Point(92, 51);
+            this.cb_longForm.Name = "cb_longForm";
+            this.cb_longForm.RightToLeft = System.Windows.Forms.RightToLeft.No;
+            this.cb_longForm.Size = new System.Drawing.Size(161, 17);
+            this.cb_longForm.TabIndex = 15;
+            this.cb_longForm.Text = "Use Long Form VU elements";
+            this.cb_longForm.UseVisualStyleBackColor = true;
+            this.cb_longForm.CheckedChanged += new System.EventHandler(this.cb_showBinary_CheckedChanged);
+            // 
+            // button2
+            // 
+            this.button2.Location = new System.Drawing.Point(5, 47);
+            this.button2.Name = "button2";
+            this.button2.Size = new System.Drawing.Size(75, 24);
+            this.button2.TabIndex = 16;
+            this.button2.Text = "Write To File";
+            this.button2.UseVisualStyleBackColor = true;
+            this.button2.Click += new System.EventHandler(this.button_Write_To_File);
+            // 
+            // cb_useArmipsNames
+            // 
+            this.cb_useArmipsNames.AutoSize = true;
+            this.cb_useArmipsNames.Location = new System.Drawing.Point(256, 51);
+            this.cb_useArmipsNames.Name = "cb_useArmipsNames";
+            this.cb_useArmipsNames.RightToLeft = System.Windows.Forms.RightToLeft.No;
+            this.cb_useArmipsNames.Size = new System.Drawing.Size(138, 17);
+            this.cb_useArmipsNames.TabIndex = 17;
+            this.cb_useArmipsNames.Text = "Use Armips CP0 Names";
+            this.cb_useArmipsNames.UseVisualStyleBackColor = true;
+            this.cb_useArmipsNames.CheckedChanged += new System.EventHandler(this.cb_showBinary_CheckedChanged);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(562, 411);
+            this.ClientSize = new System.Drawing.Size(565, 465);
+            this.Controls.Add(this.cb_useArmipsNames);
+            this.Controls.Add(this.button2);
+            this.Controls.Add(this.cb_longForm);
             this.Controls.Add(this.cb_regNames);
             this.Controls.Add(this.cb_showBinary);
             this.Controls.Add(this.cb_showAddresses);
@@ -190,7 +230,7 @@
             this.MinimumSize = new System.Drawing.Size(578, 450);
             this.Name = "Form1";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
-            this.Text = "David\'s N64 RSP disassembler";
+            this.Text = "David\'s N64 RSP disassembler v1.1";
             this.Load += new System.EventHandler(this.Form1_Load);
             this.ResumeLayout(false);
             this.PerformLayout();
@@ -211,6 +251,9 @@
         private System.Windows.Forms.CheckBox cb_showAddresses;
         private System.Windows.Forms.CheckBox cb_showBinary;
         private System.Windows.Forms.CheckBox cb_regNames;
+        private System.Windows.Forms.CheckBox cb_longForm;
+        private System.Windows.Forms.Button button2;
+        private System.Windows.Forms.CheckBox cb_useArmipsNames;
     }
 }
 

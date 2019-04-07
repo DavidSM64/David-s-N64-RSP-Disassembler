@@ -8,8 +8,17 @@ namespace N64_RSP_DISASSEMBLER
 {
     class RSP_DECODER
     {
+        [Flags]
+        public enum OPTIONS : byte
+        {
+            NO_OPTIONS = 0x00,
+            USE_GP_NAMES = 0x01,
+            USE_LONG_FORM = 0x02,
+            USE_ARMIPS_CP0_NAMES = 0x04
+        }
+
         // General-Purpose Registers
-        private enum GP_REGISTER
+        public enum GP_REGISTER
         {
             r0, // Constant 0
             at, // Used for psuedo-instructions
@@ -25,7 +34,15 @@ namespace N64_RSP_DISASSEMBLER
             ra // Return address
         }
 
-        private enum CP0_REGISTER
+        private static readonly string[] ARMIPS_CP0_NAMES = 
+        {
+            "sp_mem_addr", "sp_dram_addr", "sp_rd_len", "sp_wr_len",
+            "sp_status", "sp_dma_full", "sp_dma_busy", "sp_semaphore",
+            "dpc_start", "dpc_end", "dpc_current", "dpc_status",
+            "dpc_clock", "dpc_bufbusy", "dpc_pipebusy", "dpc_tmem"
+        };
+
+        public enum CP0_REGISTER
         {
             DMA_CACHE,
             DMA_DRAM,
@@ -45,7 +62,7 @@ namespace N64_RSP_DISASSEMBLER
             CMD_TMEM_BUSY
         }
 
-        private enum RSP_OPCODE
+        public enum RSP_OPCODE
         {
             SPECIAL = 0x00, // 000000
             REGIMM = 0x01,  // 000001
@@ -78,7 +95,7 @@ namespace N64_RSP_DISASSEMBLER
             SWC2 = 0x3A,    // 111010
         }
         
-        private enum RSP_VECTOR_OPCODE
+        public enum RSP_VECTOR_OPCODE
         {
             VMULF = 0x00, // Vector (Frac) Multiply
             VMULU = 0x01, // Vector (Unsigned Frac) Multiply
@@ -126,7 +143,7 @@ namespace N64_RSP_DISASSEMBLER
             VNOP = 0x37,  // Vector null instruction
         }
 
-        private enum RSP_LOAD_STORE_COMMAND
+        public enum RSP_LOAD_STORE_COMMAND
         {
             b = 0x00, // (BYTE)        00000
             s = 0x01, // (HALFWORD)    00001
@@ -142,8 +159,10 @@ namespace N64_RSP_DISASSEMBLER
             t = 0x0B, // (TRANSPOSE)   01011
         }
 
-        private static bool usingRegNames = true;
-
+        private static bool usingRegNames = false;
+        private static bool usingLongForm = false;
+        private static bool usingArmipsCP0Names = false;
+        
         private static string getRPRegName(byte reg)
         {
             if (usingRegNames)
@@ -162,10 +181,10 @@ namespace N64_RSP_DISASSEMBLER
 
         private static string getCP0RegName(CP0_REGISTER reg)
         {
-            //if (usingRegNames)
+            if (usingArmipsCP0Names)
+                return ARMIPS_CP0_NAMES[(int)reg];
+            else
                 return reg.ToString();
-            //else
-                //return "c" + ((byte)reg).ToString();
         }
 
         private static string decodeLoadStoreOperation(uint operation, string LorS)
@@ -176,23 +195,74 @@ namespace N64_RSP_DISASSEMBLER
             byte base_ = (byte)((operation >> 21) & 0x1F);
             byte dest = (byte)((operation >> 16) & 0x1F);
             byte del = (byte)((operation >> 7) & 0xF);
-            ushort offset = (ushort)((operation & 0x3F) * 8);
+            ushort offset = (ushort)((operation & 0x3F) << 2);
 
             str += " $v" + dest + "[" + del + "], 0x" + offset.ToString("X4") + "(" + getRPRegName(base_) + ")";
 
             return str;
         }
+        
+        private static string getLongFormForQuaterElement(int eq)
+        {
+            switch (eq)
+            {
+                case 0: return "[00224466]";
+                case 1: return "[11335577]";
+            }
+            return "";
+        }
+
+        private static string getLongFormForHalfElement(int eh)
+        {
+            switch (eh)
+            {
+                case 0: return "[00004444]";
+                case 1: return "[11115555]";
+                case 2: return "[22226666]";
+                case 3: return "[33337777]";
+            }
+            return "";
+        }
+
+        private static string getLongForm(int e)
+        {
+            switch (e)
+            {
+                case 0: return "[00000000]";
+                case 1: return "[11111111]";
+                case 2: return "[22222222]";
+                case 3: return "[33333333]";
+                case 4: return "[44444444]";
+                case 5: return "[55555555]";
+                case 6: return "[66666666]";
+                case 7: return "[77777777]";
+            }
+            return "";
+        }
 
         private static string decodeVectorElement(byte v, byte e)
         {
             if ((e & 0x8) == 8)
-                return v + "[" + (e & 0x7) + "]";
+                if (usingLongForm)
+                    return v + getLongForm(e & 0x7);
+                else
+                    return v + "[" + (e & 0x7) + "]";
             else if ((e & 0xC) == 4)
-                return v + "[" + (e & 0x3) + "h]";
+                if (usingLongForm)
+                    return v + getLongFormForHalfElement(e & 0x3);
+                else
+                    return v + "[" + (e & 0x3) + "h]";
             else if ((e & 0xE) == 2)
-                return v + "[" + (e & 0x1) + "q]";
+                if (usingLongForm)
+                    return v + getLongFormForQuaterElement(e & 0x1);
+                else
+                    return v + "[" + (e & 0x1) + "q]";
             else
-                return v.ToString();
+                if (usingLongForm)
+                    return v + "[01234567]";
+                else
+                    return v.ToString();
+
         }
 
         private static string decodeVectorElementScalarOperation(RSP_VECTOR_OPCODE opcode, uint operation)
@@ -206,7 +276,7 @@ namespace N64_RSP_DISASSEMBLER
             return opcode.ToString().ToLower() + " $v" + decodeVectorElement(vd, de) 
                 + ", $v" + decodeVectorElement(vt, e);
         }
-
+        
         private static string decodeVectorOperation(uint operation)
         {
             RSP_VECTOR_OPCODE opcode = (RSP_VECTOR_OPCODE)(operation & 0x3F);
@@ -230,27 +300,7 @@ namespace N64_RSP_DISASSEMBLER
             byte vs = (byte)((operation >> 11) & 0x1F);
             byte vd = (byte)((operation >> 6) & 0x1F);
 
-            string element = "";
-            /*
-            | Vector         | $v1     | 0 0 0 0 | vector operand
-            | Scalar Quarter | $v1[xq] | 0 0 1 x | 1 of 2 elements for 4 2-element quarters of vector
-            | Scalar Half    | $v1[xh] | 0 1 x x | 1 of 4 elements for 2 4-element halves of vector
-            | Scalar Whole   | $v1[x]  | 1 x x x | 1 of 8 elements for whole vector
-
-            Look for the "Using Scalar Elements of a Vector Register" section in the 
-            Ultra64 RSP programming manual for more information.
-            */
-            if (e != 0)
-            {
-                if ((e & 0xE) == 2)
-                    element = "[" + (e & 0x1) + "q]";
-                else if ((e & 0xC) == 4)
-                    element = "[" + (e & 0x3) + "h]";
-                else if ((e & 0x8) == 8)
-                    element = "[" + (e & 0x7) + "]";
-            }
-
-            return opcode.ToString().ToLower() + " $v" + vd + ", $v" + vs + ", $v" + vt + element;
+            return opcode.ToString().ToLower() + " $v" + vd + ", $v" + vs + ", $v" + decodeVectorElement(vt, e);
         }
 
         private static string decodeMoveControlToFromCoprocessorOperation(string opcode, uint operation)
@@ -294,6 +344,7 @@ namespace N64_RSP_DISASSEMBLER
         {
             GP_REGISTER dest = (GP_REGISTER)((operation >> 16) & 0x1F);
             GP_REGISTER base_ = (GP_REGISTER)((operation >> 21) & 0x1F);
+
             short imm = (short)(operation & 0xFFFF);
             
             if (imm < 0)
@@ -374,16 +425,19 @@ namespace N64_RSP_DISASSEMBLER
         {
             GP_REGISTER dest = (GP_REGISTER)((operation >> 11) & 0x1F);
             GP_REGISTER src = (GP_REGISTER)((operation >> 16) & 0x1F);
+
             int imm = (int)((operation >> 6) & 0x1F);
-            return opcode + " " + getGRPRegName(dest) + ", " + src.ToString() + ", " + imm;
+            return opcode + " " + getGRPRegName(dest) + ", " + getGRPRegName(src) + ", " + imm;
         }
         
-        public static string decodeOPERATION(uint operation, uint address, bool useRegNames)
+        public static string decodeOPERATION(uint operation, uint address, OPTIONS options)
         {
-            usingRegNames = useRegNames;
-
             if (operation == 0x00000000)
                 return "nop";
+
+            usingRegNames = options.HasFlag(OPTIONS.USE_GP_NAMES);
+            usingLongForm = options.HasFlag(OPTIONS.USE_LONG_FORM);
+            usingArmipsCP0Names = options.HasFlag(OPTIONS.USE_ARMIPS_CP0_NAMES);
 
             RSP_OPCODE opcode = (RSP_OPCODE)((operation >> 26) & 0x3F);
             string str = "Unimplemented (opcode: " + Convert.ToString((int)opcode, 2) + "b)";
